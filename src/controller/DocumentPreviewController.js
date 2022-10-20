@@ -1,11 +1,3 @@
-// import pdfjs from "pdfjs-dist";
-// import path from "path";
-
-// pdfjs.GlobalWorkerOptions.workerSrc = path.resolve(
-//   __dirname,
-//   "../../dist/pdf.worker.bundle.js"
-// );
-
 import PdfController from "./PdfController";
 
 export default class DocumentPreviewController {

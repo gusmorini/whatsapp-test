@@ -2,9 +2,9 @@ import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import woker from "pdfjs-dist/build/pdf.worker.entry";
 
 export default class PdfController {
-  GlobalWorkerOptions = woker;
-
-  constructor() {}
+  constructor() {
+    GlobalWorkerOptions.workerSrc = woker;
+  }
 
   viewFile(file) {
     return new Promise((resolve, reject) => {
