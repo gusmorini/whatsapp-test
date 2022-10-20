@@ -4,8 +4,14 @@ import CameraController from "./CameraController";
 import MicrophoneController from "./MicrophoneController";
 import DocumentPreviewController from "./DocumentPreviewController";
 
+import { Firebase } from "../database/firebase";
+
 export default class MainController {
   constructor() {
+    this._firebase = new Firebase();
+
+    this.authUser();
+
     PrototypesController.elementsPrototype();
     /**
      * método para carregar todos os
@@ -17,6 +23,16 @@ export default class MainController {
      * método adiciona eventos aos elementos iniciais
      */
     this.initEvents();
+  }
+
+  authUser() {
+    this._firebase
+      .auth()
+      .then((result) => {
+        console.log(result.user);
+        this.el.loader.hide();
+      })
+      .catch((err) => console.log(err));
   }
 
   loadElements() {
