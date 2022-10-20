@@ -1,5 +1,3 @@
-document.querySelector("#app").innerHTML = `
-  <div>
-    banana
-  </div>
-`;
+import MainController from "./controller/MainController";
+
+window.app = new MainController();
