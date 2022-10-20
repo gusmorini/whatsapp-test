@@ -1,4 +1,4 @@
-import PdfController from "./PdfController";
+import Pdfjs from "../util/PdfJs";
 
 export default class DocumentPreviewController {
   constructor(file) {
@@ -27,7 +27,7 @@ export default class DocumentPreviewController {
           break;
 
         case "pdf":
-          const pdf = new PdfController();
+          const pdf = new Pdfjs();
           pdf.viewFile(this._file).then(({ url, numPages }) => {
             resolve({
               src: url,

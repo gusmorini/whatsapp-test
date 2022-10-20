@@ -1,7 +1,7 @@
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import woker from "pdfjs-dist/build/pdf.worker.entry";
 
-export default class PdfController {
+export default class PdfJs {
   constructor() {
     GlobalWorkerOptions.workerSrc = woker;
   }
