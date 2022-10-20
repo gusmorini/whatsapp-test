@@ -17685,15 +17685,3 @@ html[dir="rtl"] ._2ICcy:after {
 #main {
   display: none;
 }
-
-/* fix */
-
-._2oKVP {
-  display: flex;
-  justify-content: center;
-}
-
-._2oKVP ._3ygW4 {
-  height: 100%;
-  width: auto;
-}
