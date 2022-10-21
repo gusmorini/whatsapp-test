@@ -6,6 +6,8 @@ import DocumentPreviewController from "./DocumentPreviewController";
 
 import { Firebase } from "../database/firebase";
 
+import { User } from "../model/User";
+
 export default class MainController {
   constructor() {
     this._firebase = new Firebase();
@@ -26,11 +28,35 @@ export default class MainController {
   }
 
   authUser() {
+    const usersRef = "users";
+
     this._firebase
       .auth()
-      .then((result) => {
-        console.log(result.user);
-        this.el.loader.hide();
+      .then((resp) => {
+        this._user = new User(resp.user.email);
+
+        this._user.on("datachange", ({ email, name, photo }) => {
+          document.querySelector("title").innerHTML = name + " - WhatsApp Test";
+          this.el.inputNamePanelEditProfile.innerHTML = name;
+          if (photo) {
+            let photo1 = this.el.imgPanelEditProfile;
+            photo1.src = photo;
+            photo1.show();
+            this.el.imgDefaultPanelEditProfile.hide();
+            let photo2 = this.el.myPhoto.querySelector("img");
+            photo2.src = photo;
+            photo2.show();
+          }
+        });
+
+        this._user.name = resp.user.displayName;
+        this._user.email = resp.user.email;
+        this._user.photo = resp.user.photoURL;
+
+        this._user.save().then(() => {
+          console.log(this._user.toJSON());
+          this.el.loader.hide();
+        });
       })
       .catch((err) => console.log(err));
   }
@@ -82,7 +108,11 @@ export default class MainController {
 
     /** ---- click btn save profile ---- */
     this.el.btnSavePanelEditProfile.on("click", () => {
-      console.log(this.el.inputNamePanelEditProfile.innerHTML);
+      this._user.name = this.el.inputNamePanelEditProfile.innerHTML;
+      this.el.btnSavePanelEditProfile.disabled = true;
+      this._user
+        .save()
+        .then(() => (this.el.btnSavePanelEditProfile.disabled = false));
     });
 
     /** ---- form add contact ---- */

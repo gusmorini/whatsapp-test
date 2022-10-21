@@ -1,5 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+
+import { getFirestore } from "firebase/firestore";
+
 import { getStorage } from "firebase/storage";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
@@ -24,22 +26,9 @@ export class Firebase {
     this._hd = getStorage(this._app);
   }
 
-  async saveData(data = {}) {
-    try {
-      const docRef = await addDoc(collection(this._db, "users"), data);
-      console.log("write", docRef.id);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
   auth() {
     const provider = new GoogleAuthProvider();
     const auth = getAuth();
     return signInWithPopup(auth, provider);
-    // .then((result) => {
-    //   console.log(result.user);
-    // })
-    // .catch((err) => console.log(err));
   }
 }
