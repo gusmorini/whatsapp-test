@@ -54,8 +54,32 @@ export default class MainController {
         this._user.photo = resp.user.photoURL;
 
         this._user.save().then(() => {
-          console.log(this._user.toJSON());
           this.el.loader.hide();
+          this._user.getContacts();
+
+          this._user.on("contactsChange", (docs) => {
+            docs.forEach((doc) => {
+              const contact = doc.data();
+
+              let el = this.el.cloneElements
+                .querySelector(".contact-item")
+                .cloneNode(true);
+
+              if (contact.photo) {
+                el.querySelector(".photo").show().src = contact.photo;
+              }
+
+              let nameEl = el.querySelector(".name-contact");
+              nameEl.title = contact.name;
+              nameEl.innerHTML = contact.name;
+
+              el.querySelector(".last-message-time").innerHTML = "00:00";
+
+              el.querySelector(".last-message").innerHTML = "...";
+
+              this.el.contactsMessagesList.append(el);
+            });
+          });
         });
       })
       .catch((err) => console.log(err));
@@ -118,8 +142,22 @@ export default class MainController {
     /** ---- form add contact ---- */
     this.el.formPanelAddContact.on("submit", (e) => {
       e.preventDefault();
-      let data = this.el.formPanelAddContact.toJSON();
-      console.log(data);
+      let { email } = this.el.formPanelAddContact.toJSON();
+
+      let contact = new User(email);
+
+      contact.on("datachange", (data) => {
+        if (data.name) {
+          this._user
+            .addContact(contact)
+            .then(() => {
+              this.el.btnClosePanelAddContact.click();
+            })
+            .catch((err) => console.error(err));
+        } else {
+          console.log("USUARIO NÃO ENCONTRADO");
+        }
+      });
     });
 
     /** ---- eventos lista mensagens ---- */

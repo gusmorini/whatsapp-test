@@ -4,6 +4,7 @@ import {
   setDoc,
   onSnapshot,
   getFirestore,
+  collection,
 } from "firebase/firestore";
 
 import { Model } from "./Model";
@@ -12,7 +13,6 @@ export class User extends Model {
   constructor(id) {
     super();
     this._db = getFirestore();
-    this._ref = "users";
     if (id) this.getById(id);
   }
 
@@ -37,14 +37,41 @@ export class User extends Model {
     this._data.photo = value;
   }
 
+  static getRef() {
+    return `users`;
+  }
+
+  static getRefContacts(id) {
+    return `${this.getRef()}/${id}/contacts`;
+  }
+
   getById(id) {
-    const docRef = doc(this._db, this._ref, id);
+    const docRef = doc(this._db, User.getRef(), id);
     onSnapshot(docRef, (doc) => {
       this.fromJSON(doc.data());
     });
   }
 
   save() {
-    return setDoc(doc(this._db, this._ref, this.email), this.toJSON());
+    return setDoc(doc(this._db, User.getRef(), this.email), this.toJSON());
+  }
+
+  addContact(contact) {
+    return setDoc(
+      doc(this._db, User.getRefContacts(this.email), btoa(contact.email)),
+      contact.toJSON()
+    );
+  }
+
+  getContacts() {
+    onSnapshot(
+      collection(this._db, User.getRefContacts(this.email)),
+      ({ docs }) => {
+        this.trigger("contactsChange", docs);
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
   }
 }
