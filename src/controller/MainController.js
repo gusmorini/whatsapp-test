@@ -72,12 +72,21 @@ export default class MainController {
               let nameEl = el.querySelector(".name-contact");
               nameEl.title = contact.name;
               nameEl.innerHTML = contact.name;
-
               el.querySelector(".last-message-time").innerHTML = "00:00";
-
               el.querySelector(".last-message").innerHTML = "...";
-
               this.el.contactsMessagesList.append(el);
+
+              el.on("click", (e) => {
+                this.el.activeName.title = contact.name;
+                this.el.activeName.innerHTML = contact.name;
+                this.el.activeStatus.innerHTML = "...";
+                if (contact.photo) {
+                  this.el.activePhoto.src = contact.photo;
+                  this.el.activePhoto.show();
+                }
+                this.el.home.hide();
+                this.el.main.css({ display: "flex" });
+              });
             });
           });
         });
