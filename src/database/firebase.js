@@ -22,8 +22,14 @@ export class Firebase {
 
   init() {
     this._app = initializeApp(this._conf);
-    this._db = getFirestore(this._app);
-    this._hd = getStorage(this._app);
+  }
+
+  static db() {
+    return getFirestore(this._app);
+  }
+
+  static hd() {
+    return getStorage(this._app);
   }
 
   auth() {
