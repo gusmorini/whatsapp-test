@@ -37,11 +37,10 @@ export class Chat extends Model {
   }
 
   static findExists(userEmail, contactEmail) {
-    const q = query(
-      Chat.getRefCollection(),
-      where(btoa(userEmail), "==", true),
-      where(btoa(contactEmail), "==", true)
-    );
+    let users = {};
+    users[btoa(userEmail)] = true;
+    users[btoa(contactEmail)] = true;
+    const q = query(Chat.getRefCollection(), where("users", "==", users));
     return getDocs(q);
   }
 
@@ -55,7 +54,7 @@ export class Chat extends Model {
     });
   }
 
-  static getChat(id) {
+  static getById(id) {
     return getDoc(doc(Firebase.db(), "chats", id));
   }
 
@@ -63,19 +62,16 @@ export class Chat extends Model {
     return new Promise((resolve, reject) => {
       Chat.findExists(userEmail, contactEmail)
         .then((chats) => {
-          console.log("CHATS FIND", chats);
           if (chats.empty) {
             Chat.create(userEmail, contactEmail)
-              .then((doc) => {
-                Chat.getChat(doc.id).then((chat) => {
-                  let data = chat.data();
-                  data.id = doc.id;
-                  resolve(data);
-                });
+              .then((chat) => {
+                resolve(chat);
               })
               .catch((err) => reject(err));
           } else {
-            chats.forEach((chat) => resolve(chat));
+            chats.forEach((chat) => {
+              resolve(chat);
+            });
           }
         })
         .catch((err) => reject(err));

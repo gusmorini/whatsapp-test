@@ -160,7 +160,6 @@ export default class MainController {
         if (data.name) {
           Chat.createIfNotExists(this._user.email, contact.email)
             .then((chat) => {
-              console.log("RESP", chat);
               // adiciona o chat id ao contato
               contact.chatId = chat.id;
               // adiciona o chat id ao usuario logado
