@@ -7,6 +7,7 @@ import DocumentPreviewController from "./DocumentPreviewController";
 import { Firebase } from "../database/firebase";
 
 import { User } from "../model/User";
+import { Chat } from "../model/Chat";
 
 export default class MainController {
   constructor() {
@@ -157,10 +158,23 @@ export default class MainController {
 
       contact.on("datachange", (data) => {
         if (data.name) {
-          this._user
-            .addContact(contact)
-            .then(() => {
-              this.el.btnClosePanelAddContact.click();
+          Chat.createIfNotExists(this._user.email, contact.email)
+            .then((chat) => {
+              console.log("RESP", chat);
+              // adiciona o chat id ao contato
+              contact.chatId = chat.id;
+              // adiciona o chat id ao usuario logado
+              this._user.chatId = chat.id;
+              // adiciona o usuario logado a lista de contatos
+              // do contado a ser adicionado
+              contact.addContact(this._user);
+              // adiciona o novo contato ao usuario logado
+              this._user
+                .addContact(contact)
+                .then(() => {
+                  this.el.btnClosePanelAddContact.click();
+                })
+                .catch((err) => console.error(err));
             })
             .catch((err) => console.error(err));
         } else {
