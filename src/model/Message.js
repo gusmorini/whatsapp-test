@@ -1,5 +1,8 @@
 import Model from "../model/Model";
 
+import { doc, setDoc, collection, addDoc } from "firebase/firestore";
+import { Firebase } from "../database/firebase";
+
 import {
   Contact,
   Image,
@@ -8,7 +11,7 @@ import {
   Audio,
 } from "../components/Messages/index";
 
-export class MessageController extends Model {
+export class Message extends Model {
   constructor() {
     super();
   }
@@ -66,5 +69,19 @@ export class MessageController extends Model {
     div.firstElementChild.classList.add(className);
 
     return div;
+  }
+
+  static send(chatId, from, type, content) {
+    return addDoc(Message.getRefCollection(chatId), {
+      content,
+      time: new Date(),
+      status: "wait",
+      from,
+      type,
+    });
+  }
+
+  static getRefCollection(chatId) {
+    return collection(Firebase.db(), `chats/${chatId}/messages`);
   }
 }

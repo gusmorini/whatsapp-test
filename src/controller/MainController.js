@@ -8,6 +8,7 @@ import { Firebase } from "../database/firebase";
 
 import { User } from "../model/User";
 import { Chat } from "../model/Chat";
+import { Message } from "../model/Message";
 
 export default class MainController {
   constructor() {
@@ -78,21 +79,27 @@ export default class MainController {
               this.el.contactsMessagesList.append(el);
 
               el.on("click", (e) => {
-                this.el.activeName.title = contact.name;
-                this.el.activeName.innerHTML = contact.name;
-                this.el.activeStatus.innerHTML = "...";
-                if (contact.photo) {
-                  this.el.activePhoto.src = contact.photo;
-                  this.el.activePhoto.show();
-                }
-                this.el.home.hide();
-                this.el.main.css({ display: "flex" });
+                this.setActiveChat(contact);
               });
             });
           });
         });
       })
       .catch((err) => console.log(err));
+  }
+
+  setActiveChat(contact) {
+    this._contactActive = contact;
+
+    this.el.activeName.title = contact.name;
+    this.el.activeName.innerHTML = contact.name;
+    this.el.activeStatus.innerHTML = "...";
+    if (contact.photo) {
+      this.el.activePhoto.src = contact.photo;
+      this.el.activePhoto.show();
+    }
+    this.el.home.hide();
+    this.el.main.css({ display: "flex" });
   }
 
   loadElements() {
@@ -357,9 +364,15 @@ export default class MainController {
       }
     });
     this.el.btnSend.on("click", (e) => {
-      const text = this.el.inputText.innerHTML;
-      console.log(text);
+      Message.send(
+        this._contactActive.chatId,
+        this._user.email,
+        "text",
+        this.el.inputText.innerHTML
+      );
+
       this.el.inputText.innerHTML = "";
+      this.el.panelEmojis.removeClass("open");
     });
     this.el.btnEmojis.on("click", (e) => {
       this.el.panelEmojis.toggleClass("open");

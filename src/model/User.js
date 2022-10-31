@@ -1,6 +1,6 @@
 import { doc, setDoc, onSnapshot, collection } from "firebase/firestore";
 import { Firebase } from "../database/firebase";
-import { Model } from "./Model";
+import Model from "./Model";
 
 export class User extends Model {
   constructor(id) {
