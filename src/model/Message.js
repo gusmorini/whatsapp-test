@@ -1,4 +1,5 @@
 import Model from "../model/Model";
+import Format from "../util/Format";
 
 import { doc, setDoc, collection, addDoc } from "firebase/firestore";
 import { Firebase } from "../database/firebase";
@@ -14,6 +15,13 @@ import {
 export class Message extends Model {
   constructor() {
     super();
+  }
+
+  get id() {
+    return this._data.id;
+  }
+  set id(value) {
+    return (this._data.id = value);
   }
 
   get content() {
@@ -47,6 +55,7 @@ export class Message extends Model {
   getViewElement(me = true) {
     let div = document.createElement("div");
     div.className = "message";
+    div.id = "_" + this.id;
 
     switch (this.type) {
       case "contact":
@@ -63,6 +72,10 @@ export class Message extends Model {
         break;
       default:
         div.innerHTML = Text;
+        div.querySelector(".message-text").innerHTML = this.content;
+        div.querySelector(".msg-time").innerHTML = Format.timeStampToTime(
+          this.time
+        );
     }
 
     let className = me ? "message-out" : "message-in";

@@ -5,6 +5,7 @@ import MicrophoneController from "./MicrophoneController";
 import DocumentPreviewController from "./DocumentPreviewController";
 
 import { Firebase } from "../database/firebase";
+import { onSnapshot, orderBy, query } from "firebase/firestore";
 
 import { User } from "../model/User";
 import { Chat } from "../model/Chat";
@@ -89,8 +90,15 @@ export default class MainController {
   }
 
   setActiveChat(contact) {
-    this._contactActive = contact;
+    /** removendo o onSnapshot antigo se existir */
+    if (this._contactActive) {
+      onSnapshot(
+        Message.getRefCollection(this._contactActive.chatId),
+        () => {}
+      );
+    }
 
+    this._contactActive = contact;
     this.el.activeName.title = contact.name;
     this.el.activeName.innerHTML = contact.name;
     this.el.activeStatus.innerHTML = "...";
@@ -100,6 +108,30 @@ export default class MainController {
     }
     this.el.home.hide();
     this.el.main.css({ display: "flex" });
+    /** snapShot tempo real mensagem atual */
+    onSnapshot(
+      query(
+        Message.getRefCollection(this._contactActive.chatId),
+        orderBy("time", "asc")
+      ),
+      ({ docs }) => {
+        this.el.panelMessagesContainer.innerHTML = "";
+        docs.forEach((doc) => {
+          let data = doc.data();
+          data.id = doc.id;
+          if (!this.el.panelMessagesContainer.querySelector("#_" + data.id)) {
+            let message = new Message();
+            message.fromJSON(data);
+            let me = data.from === this._user.email;
+            let view = message.getViewElement(me);
+            this.el.panelMessagesContainer.appendChild(view);
+          }
+        });
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
   }
 
   loadElements() {

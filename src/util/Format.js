@@ -29,4 +29,19 @@ export default class Format {
         .padStart(2, "0")}`;
     }
   }
+
+  /** converte Firebase timestamp em time */
+  static timeStampToTime(timestamp) {
+    return timestamp && typeof timestamp.toDate === "function"
+      ? Format.dateToTime(timestamp.toDate())
+      : "";
+  }
+
+  /** método converte date em time */
+  static dateToTime(date, locale = "pt-BR") {
+    return date.toLocaleTimeString(locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
 }
