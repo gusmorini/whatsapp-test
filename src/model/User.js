@@ -1,4 +1,4 @@
-import { doc, setDoc, onSnapshot, collection } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, collection, where, query } from "firebase/firestore";
 import { Firebase } from "../database/firebase";
 import Model from "./Model";
 
@@ -62,9 +62,12 @@ export class User extends Model {
     );
   }
 
-  getContacts() {
+  getContacts(filter = '') {
     onSnapshot(
-      collection(Firebase.db(), User.getRefContacts(this.email)),
+      query(
+        collection(Firebase.db(), User.getRefContacts(this.email)),
+        where('name', '>=', filter)
+      ),
       ({ docs }) => {
         this.trigger("contactsChange", docs);
       },

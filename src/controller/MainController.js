@@ -60,7 +60,11 @@ export default class MainController {
           this.el.loader.hide();
           this._user.getContacts();
 
+          
           this._user.on("contactsChange", (docs) => {
+
+            this.el.contactsMessagesList.innerHTML = '';
+
             docs.forEach((doc) => {
               const contact = doc.data();
 
@@ -86,7 +90,7 @@ export default class MainController {
           });
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
   }
 
   setActiveChat(contact) {
@@ -173,6 +177,20 @@ export default class MainController {
       this.el.panelEditProfile.removeClass("open");
     });
 
+    /** procurar contato */
+    this.el.inputContactSearch.on('keyup', e => {
+      const {value} = e.target
+
+      if (value.length > 0) {
+        this.el.inputContactSearchPlaceholder.hide();
+      } else {
+        this.el.inputContactSearchPlaceholder.show();
+      }
+
+      this._user.getContacts(value);
+
+    })
+
     /** ---- mostra painel adicionar contact ---- */
     this.el.btnNewContact.on("click", (e) => {
       this.closeAllPanelLeft();
@@ -235,7 +253,7 @@ export default class MainController {
             })
             .catch((err) => console.error(err));
         } else {
-          console.log("USUARIO NÃO ENCONTRADO");
+          console.error("USUARIO NÃO ENCONTRADO");
         }
       });
     });
