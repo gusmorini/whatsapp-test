@@ -5,7 +5,7 @@ import MicrophoneController from "./MicrophoneController";
 import DocumentPreviewController from "./DocumentPreviewController";
 
 import { Firebase } from "../database/firebase";
-import { onSnapshot, orderBy, query } from "firebase/firestore";
+import { onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
 
 import { User } from "../model/User";
 import { Chat } from "../model/Chat";
@@ -60,10 +60,8 @@ export default class MainController {
           this.el.loader.hide();
           this._user.getContacts();
 
-          
           this._user.on("contactsChange", (docs) => {
-
-            this.el.contactsMessagesList.innerHTML = '';
+            this.el.contactsMessagesList.innerHTML = "";
 
             docs.forEach((doc) => {
               const contact = doc.data();
@@ -133,12 +131,26 @@ export default class MainController {
         docs.forEach((doc) => {
           let data = doc.data();
           data.id = doc.id;
-          if (!this.el.panelMessagesContainer.querySelector("#_" + data.id)) {
-            let message = new Message();
-            message.fromJSON(data);
-            let me = data.from === this._user.email;
+
+          let message = new Message();
+          message.fromJSON(data);
+
+          let msgEl = this.el.panelMessagesContainer.querySelector(
+            "#_" + data.id
+          );
+
+          let me = data.from === this._user.email;
+
+          if (!msgEl) {
+            if (!me) {
+              Message.setStatus(doc.ref, "read");
+            }
+
             let view = message.getViewElement(me);
             this.el.panelMessagesContainer.appendChild(view);
+          } else if (me) {
+            msgEl.querySelector(".message-status").innerHTML =
+              message.getStatusViewElement().outerHTML;
           }
         });
 
@@ -178,8 +190,8 @@ export default class MainController {
     });
 
     /** procurar contato */
-    this.el.inputContactSearch.on('keyup', e => {
-      const {value} = e.target
+    this.el.inputContactSearch.on("keyup", (e) => {
+      const { value } = e.target;
 
       if (value.length > 0) {
         this.el.inputContactSearchPlaceholder.hide();
@@ -188,8 +200,7 @@ export default class MainController {
       }
 
       this._user.getContacts(value);
-
-    })
+    });
 
     /** ---- mostra painel adicionar contact ---- */
     this.el.btnNewContact.on("click", (e) => {
@@ -438,7 +449,11 @@ export default class MainController {
         this._user.email,
         "text",
         this.el.inputText.innerHTML
-      );
+      )
+        .then((doc) => {
+          Message.setStatus(doc, "sent");
+        })
+        .catch((err) => console.error(err));
 
       this.el.inputText.innerHTML = "";
       this.el.panelEmojis.removeClass("open");

@@ -1,7 +1,7 @@
 import Model from "../model/Model";
 import Format from "../util/Format";
 
-import { doc, setDoc, collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, setDoc } from "firebase/firestore";
 import { Firebase } from "../database/firebase";
 
 import {
@@ -11,6 +11,8 @@ import {
   Text,
   Audio,
 } from "../components/Messages/index";
+
+import { Read, Received, Sent, Wait } from "../components/Status/index";
 
 export class Message extends Model {
   constructor() {
@@ -73,13 +75,46 @@ export class Message extends Model {
       default:
         div.innerHTML = Text;
         div.querySelector(".message-text").innerHTML = this.content;
-        div.querySelector(".msg-time").innerHTML = Format.timeStampToTime(
-          this.time
-        );
     }
 
-    let className = me ? "message-out" : "message-in";
+    div.querySelector(".message-time").innerHTML = Format.timeStampToTime(
+      this.time
+    );
+
+    let className = "message-in";
+
+    /** status message */
+    if (me) {
+      className = "message-out";
+      div
+        .querySelector(".message-time")
+        .parentElement.appendChild(this.getStatusViewElement());
+    }
+
     div.firstElementChild.classList.add(className);
+
+    return div;
+  }
+
+  getStatusViewElement() {
+    let div = document.createElement("div");
+    div.className = "message-status";
+
+    switch (this.status) {
+      case "wait":
+        div.innerHTML = Wait;
+        break;
+      case "sent":
+        div.innerHTML = Sent;
+        break;
+      case "received":
+        div.innerHTML = Received;
+        break;
+      case "read":
+        div.innerHTML = Read;
+        break;
+      default:
+    }
 
     return div;
   }
@@ -96,5 +131,9 @@ export class Message extends Model {
 
   static getRefCollection(chatId) {
     return collection(Firebase.db(), `chats/${chatId}/messages`);
+  }
+
+  static setStatus(doc, status = "wait") {
+    return setDoc(doc, { status: status }, { merge: true });
   }
 }
