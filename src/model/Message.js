@@ -3,6 +3,12 @@ import Format from "../util/Format";
 
 import { collection, addDoc, setDoc } from "firebase/firestore";
 import { Firebase } from "../database/firebase";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  uploadBytesResumable,
+} from "firebase/storage";
 
 import {
   Contact,
@@ -65,6 +71,17 @@ export class Message extends Model {
         break;
       case "image":
         div.innerHTML = Image;
+
+        div.querySelector(".message-photo").src = this.content;
+
+        div.querySelector(".message-photo").on("load", (e) => {
+          div.querySelector(".message-photo").show();
+          div.querySelector("._3v3PK").css({
+            height: "auto",
+          });
+          div.querySelector("._34Olu").hide();
+        });
+
         break;
       case "document":
         div.innerHTML = File;
@@ -86,14 +103,16 @@ export class Message extends Model {
     /** status message */
     if (me) {
       className = "message-out";
-      div
-        .querySelector(".message-time")
-        .parentElement.appendChild(this.getStatusViewElement());
+      Message.setStatusViewElement(div, this.getStatusViewElement());
     }
 
     div.firstElementChild.classList.add(className);
 
     return div;
+  }
+
+  static setStatusViewElement(el, view) {
+    el.querySelector(".message-time").parentElement.appendChild(view);
   }
 
   getStatusViewElement() {
@@ -120,12 +139,41 @@ export class Message extends Model {
   }
 
   static send(chatId, from, type, content) {
-    return addDoc(Message.getRefCollection(chatId), {
-      content,
-      time: new Date(),
-      status: "wait",
-      from,
-      type,
+    return new Promise((resolve, reject) => {
+      addDoc(Message.getRefCollection(chatId), {
+        content,
+        time: new Date(),
+        status: "wait",
+        from,
+        type,
+      })
+        .then((doc) => {
+          Message.setStatus(doc, "sent");
+          resolve(doc);
+        })
+        .catch((err) => reject(err));
+    });
+  }
+
+  static sendImage(chatId, from, file) {
+    return new Promise((resolve, reject) => {
+      const fileRef = Date.now() + "_" + file.name;
+      const storageRef = ref(Firebase.hd(), from + "/" + fileRef);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          console.info("SNAPSHOT", snapshot);
+        },
+        (err) => reject(err),
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            Message.send(chatId, from, "image", downloadURL)
+              .then(() => resolve())
+              .catch((err) => reject(err));
+          });
+        }
+      );
     });
   }
 

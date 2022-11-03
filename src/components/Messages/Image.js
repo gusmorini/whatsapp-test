@@ -22,13 +22,8 @@ export default `
                 <img src="#" class="_1JVSX message-photo" style="width: 100%; display:none">
                 <div class="_1i3Za"></div>
             </div>
-            <div class="message-container-legend">
-                <div class="_3zb-j ZhF0n">
-                    <span dir="ltr" class="selectable-text invisible-space copyable-text message-text">Texto da foto</span>
-                </div>
-            </div>
             <div class="_2TvOE">
-                <div class="_1DZAH text-white" role="button">
+                <div class="_1DZAH" role="button">
                     <span class="message-time">17:22</span>
                 </div>
             </div>

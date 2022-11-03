@@ -145,12 +145,11 @@ export default class MainController {
             if (!me) {
               Message.setStatus(doc.ref, "read");
             }
-
             let view = message.getViewElement(me);
             this.el.panelMessagesContainer.appendChild(view);
           } else if (me) {
-            msgEl.querySelector(".message-status").innerHTML =
-              message.getStatusViewElement().outerHTML;
+            msgEl.querySelector(".message-status").remove();
+            Message.setStatusViewElement(msgEl, message.getStatusViewElement());
           }
         });
 
@@ -293,7 +292,9 @@ export default class MainController {
       this.el.inputPhoto.click();
     });
     this.el.inputPhoto.on("change", (e) => {
-      [...e.target.files].forEach((file) => console.log(file));
+      [...e.target.files].forEach((file) => {
+        Message.sendImage(this._contactActive.chatId, this._user.email, file);
+      });
     });
 
     /** ---- item camera ---- */
@@ -308,6 +309,7 @@ export default class MainController {
     });
     this.el.btnClosePanelCamera.on("click", () => {
       this._camera.stop();
+      this.el.btnReshootPanelCamera.click();
       this.closeAllMainPainel();
       this.el.panelMessagesContainer.show();
     });
@@ -327,8 +329,15 @@ export default class MainController {
       this.el.containerSendPicture.hide();
     });
     this.el.btnSendPicture.on("click", (e) => {
-      console.log(this.el.pictureCamera.src);
-      this._camera.stop();
+      this.el.btnClosePanelCamera.click();
+      /** converte base64 em File */
+      const base64 = this.el.pictureCamera.src;
+      fetch(base64)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], "takePicture", { type: "image/jpeg" });
+          Message.sendImage(this._contactActive.chatId, this._user.email, file);
+        });
     });
 
     /** ---- item documento ---- */
@@ -449,11 +458,7 @@ export default class MainController {
         this._user.email,
         "text",
         this.el.inputText.innerHTML
-      )
-        .then((doc) => {
-          Message.setStatus(doc, "sent");
-        })
-        .catch((err) => console.error(err));
+      );
 
       this.el.inputText.innerHTML = "";
       this.el.panelEmojis.removeClass("open");
