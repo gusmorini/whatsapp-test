@@ -21,15 +21,16 @@ Rodando no [LINK](http://127.0.0.1:5173)
 
 ## Principais tecnologias utilizadas no projeto:
 
-| tecnologia    | descrição                            |
-| ------------- | ------------------------------------ |
-| ViteJS        | ferramente para criação de build     |
-| Prototypes    | funções para os Elementos nativos    |
-| Media Devices | captura de audio e video             |
-| Canvas        | elemento html para criar imagens     |
-| PDFJS         | gerenciador de arquivos pdf          |
-| MediaRecorder | função nativa para gravação de audio |
-| Firebase      | Banco de dados realtime              |
+| tecnologia    | descrição                                                    |
+| ------------- | ------------------------------------------------------------ |
+| ViteJS        | ferramente para criação de build                             |
+| Prototypes    | funções para os Elementos nativos                            |
+| Media Devices | captura de audio e video                                     |
+| Canvas        | elemento html para criar imagens                             |
+| PDFJS         | gerenciador de arquivos pdf                                  |
+| MediaRecorder | função nativa para gravação de audio                         |
+| Firebase      | Banco de dados realtime                                      |
+| Regex         | Expressão regular, forma de identificar cadeia de caracteres |
 
 <br><br>
 

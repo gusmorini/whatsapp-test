@@ -330,14 +330,43 @@ export default class MainController {
     });
     this.el.btnSendPicture.on("click", (e) => {
       this.el.btnClosePanelCamera.click();
-      /** converte base64 em File */
+      /** base64 original */
       const base64 = this.el.pictureCamera.src;
-      fetch(base64)
-        .then((res) => res.blob())
-        .then((blob) => {
-          const file = new File([blob], "takePicture", { type: "image/jpeg" });
-          Message.sendImage(this._contactActive.chatId, this._user.email, file);
-        });
+      /** regex */
+      const regex = /^data:(.+);base64,(.*)$/;
+      const result = base64.match(regex);
+
+      const mimeType = result[1];
+      const ext = mimeType.split("/")[1];
+      const filename = `picture.${ext}`;
+
+      /** rotacionando image */
+      let picture = new Image();
+      picture.src = base64;
+      picture.onload = (e) => {
+        let canvas = document.createElement("canvas");
+        let context = canvas.getContext("2d");
+        canvas.width = picture.width;
+        canvas.height = picture.height;
+        /** translate imagem horizontal */
+        context.translate(picture.width, 0);
+        /** faz o flip vertical */
+        context.scale(-1, 1);
+        context.drawImage(picture, 0, 0, canvas.width, canvas.height);
+        /** gera o base64 da nova imagem */
+        let pictureBase64 = canvas.toDataURL(mimeType);
+        /** converte base64 em File */
+        fetch(pictureBase64)
+          .then((res) => res.blob())
+          .then((blob) => {
+            const file = new File([blob], filename, { type: mimeType });
+            Message.sendImage(
+              this._contactActive.chatId,
+              this._user.email,
+              file
+            );
+          });
+      };
     });
 
     /** ---- item documento ---- */
