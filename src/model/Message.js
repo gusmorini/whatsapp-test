@@ -71,17 +71,7 @@ export class Message extends Model {
         break;
       case "image":
         div.innerHTML = Image;
-
-        div.querySelector(".message-photo").src = this.content;
-
-        div.querySelector(".message-photo").on("load", (e) => {
-          div.querySelector(".message-photo").show();
-          div.querySelector("._3v3PK").css({
-            height: "auto",
-          });
-          div.querySelector("._34Olu").hide();
-        });
-
+        Message.showImage(div, this.content);
         break;
       case "document":
         div.innerHTML = File;
@@ -109,6 +99,17 @@ export class Message extends Model {
     div.firstElementChild.classList.add(className);
 
     return div;
+  }
+
+  static showImage(messageEl, src) {
+    messageEl.querySelector(".message-photo").src = src;
+    messageEl.querySelector(".message-photo").on("load", (e) => {
+      messageEl.querySelector("._3v3PK").css({
+        height: "auto",
+      });
+      messageEl.querySelector("._34Olu").hide();
+      messageEl.querySelector(".message-photo").show();
+    });
   }
 
   static setStatusViewElement(el, view) {
@@ -148,7 +149,9 @@ export class Message extends Model {
         type,
       })
         .then((doc) => {
-          Message.setStatus(doc, "sent");
+          Message.setData(doc, {
+            status: "sent",
+          });
           resolve(doc);
         })
         .catch((err) => reject(err));
@@ -156,6 +159,18 @@ export class Message extends Model {
   }
 
   static sendImage(chatId, from, file) {
+    Message.send(chatId, from, "image", "").then((doc) => {
+      Message.uploadFile(from, file)
+        .then((downloadURL) => {
+          Message.setData(doc, {
+            content: downloadURL,
+          });
+        })
+        .catch((err) => console.error(err));
+    });
+  }
+
+  static uploadFile(from, file) {
     return new Promise((resolve, reject) => {
       const fileRef = Date.now() + "_" + file.name;
       const storageRef = ref(Firebase.hd(), from + "/" + fileRef);
@@ -163,15 +178,13 @@ export class Message extends Model {
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          console.info("SNAPSHOT", snapshot);
+          console.info(" --- upload: ", snapshot);
         },
         (err) => reject(err),
         () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            Message.send(chatId, from, "image", downloadURL)
-              .then(() => resolve())
-              .catch((err) => reject(err));
-          });
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
+            resolve(downloadURL)
+          );
         }
       );
     });
@@ -183,5 +196,9 @@ export class Message extends Model {
 
   static setStatus(doc, status = "wait") {
     return setDoc(doc, { status: status }, { merge: true });
+  }
+
+  static setData(ref, data = {}) {
+    return setDoc(ref, data, { merge: true });
   }
 }

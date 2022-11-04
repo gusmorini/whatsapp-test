@@ -1,4 +1,5 @@
 import Format from "../util/Format";
+import Base64 from "../util/Base64";
 import PrototypesController from "./PrototypesController";
 import CameraController from "./CameraController";
 import MicrophoneController from "./MicrophoneController";
@@ -143,13 +144,25 @@ export default class MainController {
 
           if (!msgEl) {
             if (!me) {
-              Message.setStatus(doc.ref, "read");
+              Message.setData(doc.ref, { status: "read" });
             }
             let view = message.getViewElement(me);
             this.el.panelMessagesContainer.appendChild(view);
-          } else if (me) {
-            msgEl.querySelector(".message-status").remove();
-            Message.setStatusViewElement(msgEl, message.getStatusViewElement());
+          } else {
+            if (me) {
+              msgEl.querySelector(".message-status").remove();
+              Message.setStatusViewElement(
+                msgEl,
+                message.getStatusViewElement()
+              );
+            }
+
+            let photoEl = msgEl.querySelector(".message-photo");
+
+            /** carrega imagem após upload completo */
+            if (photoEl && photoEl.style.display == "none" && data.content) {
+              Message.showImage(msgEl, data.content);
+            }
           }
         });
 
@@ -330,19 +343,21 @@ export default class MainController {
     });
     this.el.btnSendPicture.on("click", (e) => {
       this.el.btnClosePanelCamera.click();
+
       /** base64 original */
       const base64 = this.el.pictureCamera.src;
       /** regex */
-      const regex = /^data:(.+);base64,(.*)$/;
-      const result = base64.match(regex);
-
-      const mimeType = result[1];
-      const ext = mimeType.split("/")[1];
-      const filename = `picture.${ext}`;
+      // const regex = /^data:(.+);base64,(.*)$/;
+      // const result = base64.match(regex);
+      // const ext = mimeType.split("/")[1];
+      // const filename = `picture.${ext}`;
 
       /** rotacionando image */
       let picture = new Image();
-      picture.src = base64;
+      picture.src = this.el.pictureCamera.src;
+
+      const mimeType = Base64.getMimeType(picture.src);
+
       picture.onload = (e) => {
         let canvas = document.createElement("canvas");
         let context = canvas.getContext("2d");
@@ -356,16 +371,15 @@ export default class MainController {
         /** gera o base64 da nova imagem */
         let pictureBase64 = canvas.toDataURL(mimeType);
         /** converte base64 em File */
-        fetch(pictureBase64)
-          .then((res) => res.blob())
-          .then((blob) => {
-            const file = new File([blob], filename, { type: mimeType });
+        Base64.toFile(pictureBase64)
+          .then((file) =>
             Message.sendImage(
               this._contactActive.chatId,
               this._user.email,
               file
-            );
-          });
+            )
+          )
+          .catch((err) => console.error(err));
       };
     });
 

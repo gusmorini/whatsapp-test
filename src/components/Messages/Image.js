@@ -2,7 +2,7 @@ export default `
   <div class="_3_7SH _3qMSo">
     <div class="KYpDv">
         <div>
-            <div class="_3v3PK" style="width: 330px; height: 330px;">
+            <div class="_3v3PK" style="width: 330px; height: 200px;">
                 <div class="_34Olu">
                     <div class="_2BzIU">
                         <div class="_2X3l6">
