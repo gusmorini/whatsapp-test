@@ -163,6 +163,13 @@ export default class MainController {
             if (photoEl && photoEl.style.display == "none" && data.content) {
               Message.showImage(msgEl, data.content);
             }
+
+            let docEl = msgEl.querySelector(".message-file-load");
+
+            /** carrega link documento após upload */
+            if (docEl && docEl.style.display == "block" && data.content) {
+              Message.createLinkOpen(msgEl, data.content);
+            }
           }
         });
 
@@ -343,21 +350,10 @@ export default class MainController {
     });
     this.el.btnSendPicture.on("click", (e) => {
       this.el.btnClosePanelCamera.click();
-
-      /** base64 original */
-      const base64 = this.el.pictureCamera.src;
-      /** regex */
-      // const regex = /^data:(.+);base64,(.*)$/;
-      // const result = base64.match(regex);
-      // const ext = mimeType.split("/")[1];
-      // const filename = `picture.${ext}`;
-
       /** rotacionando image */
       let picture = new Image();
       picture.src = this.el.pictureCamera.src;
-
       const mimeType = Base64.getMimeType(picture.src);
-
       picture.onload = (e) => {
         let canvas = document.createElement("canvas");
         let context = canvas.getContext("2d");
@@ -391,6 +387,7 @@ export default class MainController {
         height: "calc(100%)",
       });
       this.el.inputDocument.click();
+      this.el.btnSendDocument.hide();
     });
     this.el.inputDocument.on("change", (e) => {
       if (this.el.inputDocument.files.length) {
@@ -398,42 +395,26 @@ export default class MainController {
         this._document = new DocumentPreviewController(file);
         this._document
           .getPreviewData()
-          .then(({ src, name, ext, preview }) => {
+          .then((doc) => {
+            this.el.btnSendDocument.css({
+              display: "flex",
+            });
+
+            const { preview, file, icon } = doc;
+
             if (preview) {
-              this.el.imgPanelDocumentPreview.src = src;
-              this.el.infoPanelDocumentPreview.innerHTML = name;
+              this.el.imgPanelDocumentPreview.src = preview;
+              this.el.infoPanelDocumentPreview.innerHTML = file.name;
               this.el.imagePanelDocumentPreview.show();
               this.el.filePanelDocumentPreview.hide();
             } else {
-              let classIcon = "";
-              switch (ext) {
-                case "doc":
-                case "docx":
-                  classIcon = "icon-doc-doc";
-                  break;
-
-                case "xls":
-                case "xlxs":
-                  classIcon = "icon-doc-xls";
-                  break;
-
-                case "ppt":
-                case "pptx":
-                  classIcon = "icon-doc-ppt";
-                  break;
-
-                case "txt":
-                  classIcon = "icon-doc-txt";
-                  break;
-
-                default:
-                  classIcon = "icon-doc-generic";
-              }
-              this.el.iconPanelDocumentPreview.classList = "jcxhw " + classIcon;
-              this.el.filenamePanelDocumentPreview.innerHTML = name;
+              this.el.iconPanelDocumentPreview.classList = "jcxhw " + icon;
+              this.el.filenamePanelDocumentPreview.innerHTML = file.name;
               this.el.imagePanelDocumentPreview.hide();
               this.el.filePanelDocumentPreview.show();
             }
+
+            this._document._data = doc;
           })
           .catch((err) => console.error(err));
       }
@@ -441,9 +422,16 @@ export default class MainController {
     this.el.btnClosePanelDocumentPreview.on("click", (e) => {
       this.closeAllMainPainel();
       this.el.panelMessagesContainer.show();
+      this.el.imagePanelDocumentPreview.hide();
+      this.el.filePanelDocumentPreview.hide();
     });
     this.el.btnSendDocument.on("click", (e) => {
-      console.log("SEND DOCUMENT");
+      this.el.btnClosePanelDocumentPreview.click();
+      Message.sendDocument(
+        this._contactActive.chatId,
+        this._user.email,
+        this._document._data
+      );
     });
 
     /** ---- item contato ---- */
@@ -496,10 +484,9 @@ export default class MainController {
       }
     });
     this.el.btnSend.on("click", (e) => {
-      Message.send(
+      Message.sendText(
         this._contactActive.chatId,
         this._user.email,
-        "text",
         this.el.inputText.innerHTML
       );
 

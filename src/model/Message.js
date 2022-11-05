@@ -60,6 +60,43 @@ export class Message extends Model {
     return (this._data.status = value);
   }
 
+  /** get set type document */
+
+  get filename() {
+    return this._data.filename;
+  }
+  set filename(value) {
+    return (this._data.filename = value);
+  }
+
+  get pages() {
+    return this._data.pages;
+  }
+  set pages(value) {
+    return (this._data.pages = value);
+  }
+
+  get ext() {
+    return this._data.ext;
+  }
+  set ext(value) {
+    return (this._data.ext = value);
+  }
+
+  get size() {
+    return this._data.size;
+  }
+  set size(value) {
+    return (this._data.size = value);
+  }
+
+  get icon() {
+    return this._data.icon;
+  }
+  set icon(value) {
+    return (this._data.icon = value);
+  }
+
   getViewElement(me = true) {
     let div = document.createElement("div");
     div.className = "message";
@@ -75,6 +112,18 @@ export class Message extends Model {
         break;
       case "document":
         div.innerHTML = File;
+        div.querySelector(".message-file-icon").classList.add(this.icon);
+        div.querySelector(".message-filename").innerHTML = this.filename;
+        if (this.pages) {
+          div.querySelector(".message-file-info").innerHTML = this.pages;
+        } else {
+          div.querySelector(".message-file-info").remove();
+        }
+        div.querySelector(".message-file-type").innerHTML = this.ext;
+        div.querySelector(".message-file-size").innerHTML = this.size;
+        if (this.content) {
+          Message.createLinkOpen(div, this.content);
+        }
         break;
       case "audio":
         div.innerHTML = Audio;
@@ -112,6 +161,11 @@ export class Message extends Model {
     });
   }
 
+  static createLinkOpen(el, content) {
+    el.querySelector(".message-file-load").hide();
+    el.querySelector("._1vKRe").on("click", (e) => window.open(content));
+  }
+
   static setStatusViewElement(el, view) {
     el.querySelector(".message-time").parentElement.appendChild(view);
   }
@@ -139,23 +193,37 @@ export class Message extends Model {
     return div;
   }
 
-  static send(chatId, from, type, content) {
-    return new Promise((resolve, reject) => {
-      addDoc(Message.getRefCollection(chatId), {
-        content,
-        time: new Date(),
-        status: "wait",
-        from,
-        type,
-      })
-        .then((doc) => {
-          Message.setData(doc, {
-            status: "sent",
-          });
-          resolve(doc);
-        })
-        .catch((err) => reject(err));
+  static send(
+    chatId,
+    from,
+    type,
+    content = "",
+    filename = "",
+    pages = "",
+    ext = "",
+    size = 0,
+    icon = ""
+  ) {
+    return addDoc(Message.getRefCollection(chatId), {
+      content,
+      time: new Date(),
+      status: "wait",
+      from,
+      type,
+      filename,
+      pages,
+      ext,
+      size,
+      icon,
     });
+  }
+
+  static sendText(chatId, from, message) {
+    Message.send(chatId, from, "text", message).then((doc) =>
+      Message.setData(doc, {
+        status: "sent",
+      }).catch((err) => console.error(err))
+    );
   }
 
   static sendImage(chatId, from, file) {
@@ -164,16 +232,47 @@ export class Message extends Model {
         .then((downloadURL) => {
           Message.setData(doc, {
             content: downloadURL,
+            status: "sent",
           });
         })
         .catch((err) => console.error(err));
     });
   }
 
+  static sendDocument(chatId, from, data) {
+    console.log("SEND DOCUMENT", chatId, from, data);
+    // Message.send(chatId, from, "document", "");
+    Message.send(
+      chatId,
+      from,
+      "document",
+      "",
+      data.file.name,
+      data.pages || "",
+      data.ext,
+      data.file.size,
+      data.icon
+    )
+      .then((doc) => {
+        Message.uploadFile(from, data.file)
+          .then((url) => {
+            Message.setData(doc, {
+              content: url,
+              status: "sent",
+            });
+          })
+          .catch((err) => console.error(err));
+      })
+      .catch((err) => console.error(err));
+  }
+
   static uploadFile(from, file) {
     return new Promise((resolve, reject) => {
-      const fileRef = Date.now() + "_" + file.name;
-      const storageRef = ref(Firebase.hd(), from + "/" + fileRef);
+      const split = file.name.split(".");
+      const ext = split[split.length - 1];
+      const filename = `file${Date.now()}.${ext}`;
+      const fileRef = `${from}/${filename}`;
+      const storageRef = ref(Firebase.hd(), fileRef);
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
         "state_changed",
