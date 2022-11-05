@@ -4,6 +4,7 @@ import PrototypesController from "./PrototypesController";
 import CameraController from "./CameraController";
 import MicrophoneController from "./MicrophoneController";
 import DocumentPreviewController from "./DocumentPreviewController";
+import ContactController from "./ContactController";
 
 import { Firebase } from "../database/firebase";
 import { onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
@@ -436,10 +437,22 @@ export default class MainController {
 
     /** ---- item contato ---- */
     this.el.btnAttachContact.on("click", () => {
-      this.el.modalContacts.show();
+      // this.el.modalContacts.show();
+      this._contact = new ContactController(this.el.modalContacts, this._user);
+
+      this._contact.on("select", (contact) => {
+        Message.sendContact(
+          this._contactActive.chatId,
+          this._user.email,
+          contact
+        );
+      });
+
+      this._contact.open();
     });
     this.el.btnCloseModalContacts.on("click", (e) =>
-      this.el.modalContacts.hide()
+      // this.el.modalContacts.hide()
+      this._contact.close()
     );
 
     /** ---- eventos microfone ---- */

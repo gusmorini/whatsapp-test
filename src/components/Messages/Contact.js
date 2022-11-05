@@ -6,7 +6,7 @@ export default `
           <div class="_3DZ69" role="button">
               <div class="_20hTB">
                   <div class="_1WliW" style="height: 49px; width: 49px;">
-                      <img src="#" class="Qgzj8 gqwaM photo-contact-sended" style="display:none">
+                      <img src="#" id="photo-contact-sended" class="Qgzj8 gqwaM photo-contact-sended" style="display:none">
                       <div class="_3ZW2E">
                           <span data-icon="default-user">
                               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 212" width="212" height="212">
@@ -20,7 +20,7 @@ export default `
                   </div>
               </div>
               <div class="_1lC8v">
-                  <div dir="ltr" class="_3gkvk selectable-text invisible-space copyable-text">Nome do Contato Anexado</div>
+                  <div id="name-contact-sended" dir="ltr" class="_3gkvk selectable-text invisible-space copyable-text">Nome do Contato Anexado</div>
               </div>
               <div class="_3a5-b">
                   <div class="_1DZAH" role="button">
@@ -29,7 +29,7 @@ export default `
               </div>
           </div>
           <div class="_6qEXM">
-              <div class="btn-message-send" role="button">Enviar mensagem</div>
+              <div id="btn-contact-sended" class="btn-message-send" role="button">Enviar mensagem</div>
           </div>
       </div>
   </div>

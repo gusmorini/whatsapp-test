@@ -105,6 +105,15 @@ export class Message extends Model {
     switch (this.type) {
       case "contact":
         div.innerHTML = Contact;
+        div.querySelector("#name-contact-sended").innerHTML = this.content.name;
+        if (this.content.photo) {
+          let img = div.querySelector("#photo-contact-sended");
+          img.src = this.content.photo;
+          img.show();
+        }
+        div.querySelector("#btn-contact-sended").on("click", (e) => {
+          console.log("ENVIAR MENSAGEM");
+        });
         break;
       case "image":
         div.innerHTML = Image;
@@ -219,6 +228,16 @@ export class Message extends Model {
       size,
       icon,
     });
+  }
+
+  static sendContact(chatId, from, contact) {
+    Message.send(chatId, from, "contact", contact)
+      .then((doc) =>
+        Message.setData(doc, {
+          status: "sent",
+        })
+      )
+      .catch((err) => console.err(err));
   }
 
   static sendText(chatId, from, message) {

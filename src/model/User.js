@@ -1,4 +1,11 @@
-import { doc, setDoc, onSnapshot, collection, where, query } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  onSnapshot,
+  collection,
+  where,
+  query,
+} from "firebase/firestore";
 import { Firebase } from "../database/firebase";
 import Model from "./Model";
 
@@ -62,18 +69,21 @@ export class User extends Model {
     );
   }
 
-  getContacts(filter = '') {
-    onSnapshot(
-      query(
-        collection(Firebase.db(), User.getRefContacts(this.email)),
-        where('name', '>=', filter)
-      ),
-      ({ docs }) => {
-        this.trigger("contactsChange", docs);
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
+  getContacts(filter = "") {
+    return new Promise((resolve, reject) => {
+      onSnapshot(
+        query(
+          collection(Firebase.db(), User.getRefContacts(this.email)),
+          where("name", ">=", filter)
+        ),
+        ({ docs }) => {
+          this.trigger("contactsChange", docs);
+          resolve(docs);
+        },
+        (error) => {
+          reject(error);
+        }
+      );
+    });
   }
 }
