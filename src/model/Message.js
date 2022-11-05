@@ -153,9 +153,12 @@ export class Message extends Model {
   static showImage(messageEl, src) {
     messageEl.querySelector(".message-photo").src = src;
     messageEl.querySelector(".message-photo").on("load", (e) => {
-      messageEl.querySelector("._3v3PK").css({
-        height: "auto",
-      });
+      messageEl
+        .querySelector("._3v3PK")
+        .css({
+          height: "auto",
+        })
+        .on("click", (e) => window.open(src));
       messageEl.querySelector("._34Olu").hide();
       messageEl.querySelector(".message-photo").show();
     });
@@ -240,8 +243,6 @@ export class Message extends Model {
   }
 
   static sendDocument(chatId, from, data) {
-    console.log("SEND DOCUMENT", chatId, from, data);
-    // Message.send(chatId, from, "document", "");
     Message.send(
       chatId,
       from,

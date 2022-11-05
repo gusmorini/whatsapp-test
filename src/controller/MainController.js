@@ -410,8 +410,8 @@ export default class MainController {
             } else {
               this.el.iconPanelDocumentPreview.classList = "jcxhw " + icon;
               this.el.filenamePanelDocumentPreview.innerHTML = file.name;
-              this.el.imagePanelDocumentPreview.hide();
               this.el.filePanelDocumentPreview.show();
+              this.el.imagePanelDocumentPreview.hide();
             }
 
             this._document._data = doc;
@@ -422,8 +422,8 @@ export default class MainController {
     this.el.btnClosePanelDocumentPreview.on("click", (e) => {
       this.closeAllMainPainel();
       this.el.panelMessagesContainer.show();
-      this.el.imagePanelDocumentPreview.hide();
       this.el.filePanelDocumentPreview.hide();
+      this.el.imagePanelDocumentPreview.hide();
     });
     this.el.btnSendDocument.on("click", (e) => {
       this.el.btnClosePanelDocumentPreview.click();
