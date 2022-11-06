@@ -5,37 +5,18 @@
   left: 0;
   bottom: 0;
   right: 0;
-  background: #605f65;
+  background: #2a9187;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  color: #f8f9fb;
 }
 
-#loader p {
+#loader svg {
+  margin-bottom: 2rem;
   width: 50px;
   height: 50px;
-  border: 4px solid #333;
-  animation: infinite _rotate 2s;
-  opacity: 0.5;
-}
-
-#loader span {
-  display: block;
-  margin: 2rem;
-  color: #333;
-}
-
-@keyframes _rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(360deg) scale(0.5);
-  }
-  100% {
-    transform: rotate(720deg);
-  }
 }
 
 /* fix */
