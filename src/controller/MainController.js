@@ -1,5 +1,6 @@
 import Format from "../util/Format";
 import Base64 from "../util/Base64";
+import Upload from "../util/Upload";
 import PrototypesController from "./PrototypesController";
 import CameraController from "./CameraController";
 import MicrophoneController from "./MicrophoneController";
@@ -206,7 +207,6 @@ export default class MainController {
               data.content &&
               data.duration
             ) {
-              console.log("AUDIO", audioLoadEl, data);
               Message.createAudioEvents(msgEl, data.content, data.duration);
             }
           }
@@ -273,8 +273,20 @@ export default class MainController {
     });
 
     /** ---- captura imagem usuario ---- */
-    this.el.imgDefaultPanelEditProfile.on("click", (e) => {
+    this.el.photoContainerEditProfile.on("click", (e) => {
       this.el.inputProfilePhoto.click();
+    });
+
+    this.el.inputProfilePhoto.on("change", (e) => {
+      let file = e.target.files[0];
+      if (file) {
+        Upload.uploadFile(this._user.email, file).then((url) => {
+          this._user.photo = url;
+          this._user.save().then(() => {
+            this.el.btnClosePanelEditProfile.click();
+          });
+        });
+      }
     });
 
     /** ---- captura texto profile e click ao pressionar enter ---- */
