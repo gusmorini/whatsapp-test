@@ -153,6 +153,9 @@ export default class MainController {
                 .then((chat) => {
                   /* instancia o novo usuario */
                   let contact = new User(message.content.email);
+
+                  console.log("NEW CONTACT", contact);
+
                   contact.on("datachange", (e) => {
                     contact.chatId = chat.id;
                     this._user.chatId = chat.id;

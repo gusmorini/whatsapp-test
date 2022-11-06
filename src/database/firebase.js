@@ -33,8 +33,22 @@ export class Firebase {
   }
 
   auth() {
-    const provider = new GoogleAuthProvider();
-    const auth = getAuth();
-    return signInWithPopup(auth, provider);
+    return new Promise((resolve, reject) => {
+      let user = window.localStorage.getItem("user");
+      if (user) {
+        const data = JSON.parse(user);
+        resolve({
+          user: {
+            email: data.email,
+            displayName: data.name,
+            photoURL: data.photo,
+          },
+        });
+      } else {
+        const provider = new GoogleAuthProvider();
+        const auth = getAuth();
+        resolve(signInWithPopup(auth, provider));
+      }
+    });
   }
 }

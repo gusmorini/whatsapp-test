@@ -59,6 +59,11 @@ export class User extends Model {
   }
 
   save() {
+    // salva dados local storage
+    if (!window.localStorage.getItem("user")) {
+      window.localStorage.setItem("user", JSON.stringify(this.toJSON()));
+    }
+    // salva dados firebase
     return setDoc(doc(Firebase.db(), User.getRef(), this.email), this.toJSON());
   }
 
