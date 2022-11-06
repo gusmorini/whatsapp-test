@@ -44,12 +44,23 @@ export default class MicrophoneController extends ClassEvent {
           type: this._mimetype,
         });
         let filename = `rec_${Date.now()}.${this._mimetype.split("/")[1]}`;
-        let file = new File([blob], filename, {
-          type: this._mimetype,
-          lastModified: Date.now(),
-        });
 
-        console.log("---- FILE ---- ", file);
+        let audioContext = new AudioContext();
+        let reader = new FileReader();
+
+        reader.onload = (e) => {
+          audioContext
+            .decodeAudioData(reader.result)
+            .then((metadata) => {
+              let file = new File([blob], filename, {
+                type: this._mimetype,
+                lastModified: Date.now(),
+              });
+              this.trigger("recorded", file, metadata);
+            })
+            .catch((err) => console.error(err));
+        };
+        reader.readAsArrayBuffer(blob);
       });
 
       this._mediaRecorder.start();

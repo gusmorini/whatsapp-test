@@ -97,6 +97,22 @@ export class Message extends Model {
     return (this._data.icon = value);
   }
 
+  /** get set audio */
+
+  get photo() {
+    return this._data.photo;
+  }
+  set photo(value) {
+    return (this._data.photo = value);
+  }
+
+  get duration() {
+    return this._data.duration;
+  }
+  set duration(value) {
+    return (this._data.duration = value);
+  }
+
   getViewElement(me = true) {
     let div = document.createElement("div");
     div.className = "message";
@@ -111,9 +127,6 @@ export class Message extends Model {
           img.src = this.content.photo;
           img.show();
         }
-        // div.querySelector("#btn-contact-sended").on("click", (e) => {
-        //   console.log("ENVIAR MENSAGEM --- ", this.content.email);
-        // });
         break;
       case "image":
         div.innerHTML = Image;
@@ -136,6 +149,62 @@ export class Message extends Model {
         break;
       case "audio":
         div.innerHTML = Audio;
+
+        if (this.photo) {
+          let img = div.querySelector(".message-photo");
+          img.src = this.photo;
+          img.show();
+        }
+
+        let audioEl = div.querySelector("audio");
+        audioEl.src = this.content;
+
+        let loadEl = div.querySelector(".audio-load");
+        let playEl = div.querySelector(".audio-play");
+        let pauseEl = div.querySelector(".audio-pause");
+        let inputRange = div.querySelector("[type=range]");
+        let currentEl = div.querySelector(
+          ".message-audio-duration span.current"
+        );
+
+        let durationEl = div.querySelector(
+          ".message-audio-duration span.duration"
+        );
+
+        durationEl.innerHTML = Format.toTime(this.duration * 1000);
+
+        audioEl.onloadeddata = (e) => {
+          loadEl.hide();
+          playEl.show();
+        };
+
+        audioEl.onplay = (e) => {
+          playEl.hide();
+          pauseEl.show();
+        };
+
+        audioEl.onpause = (e) => {
+          currentEl.innerHTML = Format.toTime(this.duration * 1000);
+          pauseEl.hide();
+          playEl.show();
+        };
+
+        audioEl.onended = (e) => {
+          audioEl.currentTime = 0;
+        };
+
+        audioEl.ontimeupdate = (e) => {
+          currentEl.innerHTML = Format.toTime(audioEl.currentTime * 1000);
+          inputRange.value = (audioEl.currentTime * 100) / this.duration;
+        };
+
+        playEl.on("click", () => audioEl.play());
+        pauseEl.on("click", () => audioEl.pause());
+
+        inputRange.on("change", (e) => {
+          audioEl.currentTime = (inputRange.value * this.duration) / 100;
+        });
+
         break;
       default:
         div.innerHTML = Text;
@@ -205,7 +274,7 @@ export class Message extends Model {
     return div;
   }
 
-  static send(
+  static send({
     chatId,
     from,
     type,
@@ -214,8 +283,10 @@ export class Message extends Model {
     pages = "",
     ext = "",
     size = 0,
-    icon = ""
-  ) {
+    icon = "",
+    photo = "",
+    duration = 0,
+  }) {
     return addDoc(Message.getRefCollection(chatId), {
       content,
       time: new Date(),
@@ -227,11 +298,30 @@ export class Message extends Model {
       ext,
       size,
       icon,
+      photo,
+      duration,
+    });
+  }
+
+  static sendAudio(chatId, from, file, metadata, photo) {
+    Message.send({
+      chatId,
+      from,
+      type: "audio",
+      photo,
+      duration: metadata.duration,
+    }).then((doc) => {
+      Message.uploadFile(from, file).then((url) => {
+        Message.setData(doc, {
+          status: "sent",
+          content: url,
+        });
+      });
     });
   }
 
   static sendContact(chatId, from, contact) {
-    Message.send(chatId, from, "contact", contact)
+    Message.send({ chatId, from, type: "contact", content: contact })
       .then((doc) =>
         Message.setData(doc, {
           status: "sent",
@@ -241,7 +331,7 @@ export class Message extends Model {
   }
 
   static sendText(chatId, from, message) {
-    Message.send(chatId, from, "text", message).then((doc) =>
+    Message.send({ chatId, from, type: "text", content: message }).then((doc) =>
       Message.setData(doc, {
         status: "sent",
       }).catch((err) => console.error(err))
@@ -249,7 +339,7 @@ export class Message extends Model {
   }
 
   static sendImage(chatId, from, file) {
-    Message.send(chatId, from, "image", "").then((doc) => {
+    Message.send({ chatId, from, type: "image" }).then((doc) => {
       Message.uploadFile(from, file)
         .then((downloadURL) => {
           Message.setData(doc, {
@@ -262,17 +352,16 @@ export class Message extends Model {
   }
 
   static sendDocument(chatId, from, data) {
-    Message.send(
+    Message.send({
       chatId,
       from,
-      "document",
-      "",
-      data.file.name,
-      data.pages || "",
-      data.ext,
-      data.file.size,
-      data.icon
-    )
+      type: "document",
+      filename: data.file.name,
+      pages: data.pages || "",
+      ext: data.ext,
+      size: data.file.size,
+      icon: data.icon,
+    })
       .then((doc) => {
         Message.uploadFile(from, data.file)
           .then((url) => {

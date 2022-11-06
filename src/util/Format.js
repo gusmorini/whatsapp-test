@@ -24,7 +24,9 @@ export default class Format {
         .toString()
         .padStart(2, "0")}`;
     } else {
-      return `${minutes.toString().padStart(2, "0")}:${seconds
+      return `${minutes
+        .toString()
+        .padStart(minutes < 10 ? 1 : 2, "0")}:${seconds
         .toString()
         .padStart(2, "0")}`;
     }

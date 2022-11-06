@@ -153,9 +153,6 @@ export default class MainController {
                 .then((chat) => {
                   /* instancia o novo usuario */
                   let contact = new User(message.content.email);
-
-                  console.log("NEW CONTACT", contact);
-
                   contact.on("datachange", (e) => {
                     contact.chatId = chat.id;
                     this._user.chatId = chat.id;
@@ -501,6 +498,16 @@ export default class MainController {
       this._microphone.stopRecorder();
     });
     this.el.btnFinishMicrophone.on("click", (e) => {
+      this._microphone.on("recorded", (file, metadata) => {
+        Message.sendAudio(
+          this._contactActive.chatId,
+          this._user.email,
+          file,
+          metadata,
+          this._user.photo
+        );
+      });
+
       this.closeRecordMicrophone();
       this._microphone.stopRecorder();
     });

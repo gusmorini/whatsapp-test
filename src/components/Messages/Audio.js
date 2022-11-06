@@ -5,17 +5,17 @@ export default `
               <div class="_2cfqh">
                   <div class="_1QMEq _1kZiz fS1bA">
                       <div class="E5U9C">
-                          <svg class="_1UDDE" width="34" height="34" viewBox="0 0 43 43">
+                          <svg class="_1UDDE audio-load" width="34" height="34" viewBox="0 0 43 43">
                               <circle class="_3GbTq _37WZ9" cx="21.5" cy="21.5" r="20" fill="none" stroke-width="3"></circle>
                           </svg>
-                          <button class="_2pQE3" style="display:none">
+                          <button class="_2pQE3 audio-play" style="display:none">
                               <span data-icon="audio-play">
                                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="34" height="34">
                                       <path fill="#263238" fill-opacity=".5" d="M8.5 8.7c0-1.7 1.2-2.4 2.6-1.5l14.4 8.3c1.4.8 1.4 2.2 0 3l-14.4 8.3c-1.4.8-2.6.2-2.6-1.5V8.7z"></path>
                                   </svg>
                               </span>
                           </button>
-                          <button class="_2pQE3">
+                          <button class="_2pQE3 audio-pause" style="display:none">
                               <span data-icon="audio-pause">
                                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="34" height="34">
                                       <path fill="#263238" fill-opacity=".5" d="M9.2 25c0 .5.4 1 .9 1h3.6c.5 0 .9-.4.9-1V9c0-.5-.4-.9-.9-.9h-3.6c-.4-.1-.9.3-.9.9v16zm11-17c-.5 0-1 .4-1 .9V25c0 .5.4 1 1 1h3.6c.5 0 1-.4 1-1V9c0-.5-.4-.9-1-.9 0-.1-3.6-.1-3.6-.1z"></path>
@@ -24,7 +24,10 @@ export default `
                           </button>
                       </div>
                       <div class="_1_Gu6">
-                          <div class="message-audio-duration">0:05</div>
+                          <div class="message-audio-duration">
+                            <span class="current">0:00</span> / 
+                            <span class="duration">0:00</span>
+                          </div>
                           <div class="_1sLSi">
                               <span class="nDKsM" style="width: 0%;"></span>
                               <input type="range" min="0" max="100" class="_3geJ8" value="0">
