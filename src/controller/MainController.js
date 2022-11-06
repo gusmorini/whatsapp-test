@@ -143,11 +143,35 @@ export default class MainController {
 
           let me = data.from === this._user.email;
 
+          let view = message.getViewElement(me);
+
+          /** adiciona click ao elemento contato */
+          if (message.type === "contact") {
+            view.querySelector("#btn-contact-sended").on("click", (e) => {
+              /** cria o chat se não existir */
+              Chat.createIfNotExists(this._user.email, message.content.email)
+                .then((chat) => {
+                  /* instancia o novo usuario */
+                  let contact = new User(message.content.email);
+                  contact.on("datachange", (e) => {
+                    contact.chatId = chat.id;
+                    this._user.chatId = chat.id;
+                    /** adiciona o novo contato ao usuario logado */
+                    this._user.addContact(contact);
+                    /** adiciona o usuario logado ao contato */
+                    contact.addContact(this._user);
+                    /** ativa o chat */
+                    this.setActiveChat(contact);
+                  });
+                })
+                .catch((err) => console.error(err));
+            });
+          }
+
           if (!msgEl) {
             if (!me) {
               Message.setData(doc.ref, { status: "read" });
             }
-            let view = message.getViewElement(me);
             this.el.panelMessagesContainer.appendChild(view);
           } else {
             if (me) {

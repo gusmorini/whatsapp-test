@@ -111,9 +111,9 @@ export class Message extends Model {
           img.src = this.content.photo;
           img.show();
         }
-        div.querySelector("#btn-contact-sended").on("click", (e) => {
-          console.log("ENVIAR MENSAGEM");
-        });
+        // div.querySelector("#btn-contact-sended").on("click", (e) => {
+        //   console.log("ENVIAR MENSAGEM --- ", this.content.email);
+        // });
         break;
       case "image":
         div.innerHTML = Image;
