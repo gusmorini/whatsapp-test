@@ -195,6 +195,20 @@ export default class MainController {
             if (docEl && docEl.style.display == "block" && data.content) {
               Message.createLinkOpen(msgEl, data.content);
             }
+
+            let audioLoadEl = msgEl.querySelector("svg.audio-load");
+
+            /** carrega events audio após upload */
+            if (
+              audioLoadEl &&
+              audioLoadEl.style.display !== "none" &&
+              data.type === "audio" &&
+              data.content &&
+              data.duration
+            ) {
+              console.log("AUDIO", audioLoadEl, data);
+              Message.createAudioEvents(msgEl, data.content, data.duration);
+            }
           }
         });
 

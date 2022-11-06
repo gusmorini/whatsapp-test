@@ -156,54 +156,7 @@ export class Message extends Model {
           img.show();
         }
 
-        let audioEl = div.querySelector("audio");
-        audioEl.src = this.content;
-
-        let loadEl = div.querySelector(".audio-load");
-        let playEl = div.querySelector(".audio-play");
-        let pauseEl = div.querySelector(".audio-pause");
-        let inputRange = div.querySelector("[type=range]");
-        let currentEl = div.querySelector(
-          ".message-audio-duration span.current"
-        );
-
-        let durationEl = div.querySelector(
-          ".message-audio-duration span.duration"
-        );
-
-        durationEl.innerHTML = Format.toTime(this.duration * 1000);
-
-        audioEl.onloadeddata = (e) => {
-          loadEl.hide();
-          playEl.show();
-        };
-
-        audioEl.onplay = (e) => {
-          playEl.hide();
-          pauseEl.show();
-        };
-
-        audioEl.onpause = (e) => {
-          currentEl.innerHTML = Format.toTime(this.duration * 1000);
-          pauseEl.hide();
-          playEl.show();
-        };
-
-        audioEl.onended = (e) => {
-          audioEl.currentTime = 0;
-        };
-
-        audioEl.ontimeupdate = (e) => {
-          currentEl.innerHTML = Format.toTime(audioEl.currentTime * 1000);
-          inputRange.value = (audioEl.currentTime * 100) / this.duration;
-        };
-
-        playEl.on("click", () => audioEl.play());
-        pauseEl.on("click", () => audioEl.pause());
-
-        inputRange.on("change", (e) => {
-          audioEl.currentTime = (inputRange.value * this.duration) / 100;
-        });
+        Message.createAudioEvents(div, this.content, this.duration);
 
         break;
       default:
@@ -226,6 +179,53 @@ export class Message extends Model {
     div.firstElementChild.classList.add(className);
 
     return div;
+  }
+
+  static createAudioEvents(el, content, duration) {
+    let audioEl = el.querySelector("audio");
+    audioEl.src = content;
+
+    let loadEl = el.querySelector(".audio-load");
+    let playEl = el.querySelector(".audio-play");
+    let pauseEl = el.querySelector(".audio-pause");
+    let inputRange = el.querySelector("[type=range]");
+    let currentEl = el.querySelector(".message-audio-duration span.current");
+
+    let durationEl = el.querySelector(".message-audio-duration span.duration");
+
+    durationEl.innerHTML = Format.toTime(duration * 1000);
+
+    audioEl.onloadeddata = (e) => {
+      loadEl.hide();
+      playEl.show();
+    };
+
+    audioEl.onplay = (e) => {
+      playEl.hide();
+      pauseEl.show();
+    };
+
+    audioEl.onpause = (e) => {
+      currentEl.innerHTML = Format.toTime(duration * 1000);
+      pauseEl.hide();
+      playEl.show();
+    };
+
+    audioEl.onended = (e) => {
+      audioEl.currentTime = 0;
+    };
+
+    audioEl.ontimeupdate = (e) => {
+      currentEl.innerHTML = Format.toTime(audioEl.currentTime * 1000);
+      inputRange.value = (audioEl.currentTime * 100) / duration;
+    };
+
+    playEl.on("click", () => audioEl.play());
+    pauseEl.on("click", () => audioEl.pause());
+
+    inputRange.on("change", (e) => {
+      audioEl.currentTime = (inputRange.value * duration) / 100;
+    });
   }
 
   static showImage(messageEl, src) {
