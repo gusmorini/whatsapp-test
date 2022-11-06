@@ -1,14 +1,9 @@
 import Model from "../model/Model";
 import Format from "../util/Format";
+import Upload from "../util/Upload";
 
 import { collection, addDoc, setDoc } from "firebase/firestore";
 import { Firebase } from "../database/firebase";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  uploadBytesResumable,
-} from "firebase/storage";
 
 import {
   Contact,
@@ -311,7 +306,7 @@ export class Message extends Model {
       photo,
       duration: metadata.duration,
     }).then((doc) => {
-      Message.uploadFile(from, file).then((url) => {
+      Upload.uploadFile(from, file).then((url) => {
         Message.setData(doc, {
           status: "sent",
           content: url,
@@ -340,7 +335,7 @@ export class Message extends Model {
 
   static sendImage(chatId, from, file) {
     Message.send({ chatId, from, type: "image" }).then((doc) => {
-      Message.uploadFile(from, file)
+      Upload.uploadFile(from, file)
         .then((downloadURL) => {
           Message.setData(doc, {
             content: downloadURL,
@@ -363,7 +358,7 @@ export class Message extends Model {
       icon: data.icon,
     })
       .then((doc) => {
-        Message.uploadFile(from, data.file)
+        Upload.uploadFile(from, data.file)
           .then((url) => {
             Message.setData(doc, {
               content: url,
@@ -375,35 +370,8 @@ export class Message extends Model {
       .catch((err) => console.error(err));
   }
 
-  static uploadFile(from, file) {
-    return new Promise((resolve, reject) => {
-      const split = file.name.split(".");
-      const ext = split[split.length - 1];
-      const filename = `file${Date.now()}.${ext}`;
-      const fileRef = `${from}/${filename}`;
-      const storageRef = ref(Firebase.hd(), fileRef);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          console.info(" --- upload: ", snapshot);
-        },
-        (err) => reject(err),
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
-            resolve(downloadURL)
-          );
-        }
-      );
-    });
-  }
-
   static getRefCollection(chatId) {
     return collection(Firebase.db(), `chats/${chatId}/messages`);
-  }
-
-  static setStatus(doc, status = "wait") {
-    return setDoc(doc, { status: status }, { merge: true });
   }
 
   static setData(ref, data = {}) {
