@@ -80,8 +80,9 @@ export default class MainController {
               let nameEl = el.querySelector(".name-contact");
               nameEl.title = contact.name;
               nameEl.innerHTML = contact.name;
-              el.querySelector(".last-message-time").innerHTML = "00:00";
-              el.querySelector(".last-message").innerHTML = "...";
+              el.querySelector(".last-message-time").innerHTML =
+                Format.timeStampToTime(contact.lastMessageTime);
+              el.querySelector(".last-message").innerHTML = contact.lastMessage;
               this.el.contactsMessagesList.append(el);
 
               el.on("click", (e) => {
